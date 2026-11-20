@@ -3,6 +3,7 @@ import { ThemeProvider } from '../context/ThemeContext';
 import { AuthProvider } from '../context/AuthContext';
 import { Toaster } from 'react-hot-toast';
 import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
 
 export const metadata = {
   title: 'EquipRent — Premium Equipment Rental Marketplace',
@@ -20,6 +21,7 @@ export default function RootLayout({ children }) {
             <div className="flex-1 flex flex-col">
               {children}
             </div>
+            <Footer />
           </AuthProvider>
         </ThemeProvider>
       </body>
