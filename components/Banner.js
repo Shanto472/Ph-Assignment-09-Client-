@@ -131,36 +131,6 @@ export default function Banner() {
                 </div>
               </div>
 
-              {/* Floating Stat Card */}
-              <motion.div 
-                className="hidden sm:flex absolute -top-4 -left-6 p-4 rounded-2xl bg-white dark:bg-slate-800 shadow-xl border border-slate-200 dark:border-slate-700 items-center gap-3"
-                animate={{ y: [0, -6, 0] }}
-                transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-              >
-                <div className="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 flex items-center justify-center font-bold">
-                  99%
-                </div>
-                <div>
-                  <p className="text-xs font-bold text-slate-900 dark:text-white">Reliability Score</p>
-                  <p className="text-[11px] text-slate-500">Verified Equipment Inspections</p>
-                </div>
-              </motion.div>
-
-              {/* Floating Bookings Card */}
-              <motion.div 
-                className="hidden sm:flex absolute -bottom-6 -right-6 p-4 rounded-2xl bg-white dark:bg-slate-800 shadow-xl border border-slate-200 dark:border-slate-700 items-center gap-3"
-                animate={{ y: [0, 6, 0] }}
-                transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
-              >
-                <div className="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-950/60 text-blue-600 flex items-center justify-center font-bold">
-                  10k+
-                </div>
-                <div>
-                  <p className="text-xs font-bold text-slate-900 dark:text-white">Successful Rentals</p>
-                  <p className="text-[11px] text-slate-500">Across 6 Major Industries</p>
-                </div>
-              </motion.div>
-
             </div>
           </motion.div>
 
