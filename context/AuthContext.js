@@ -4,7 +4,30 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 
 const AuthContext = createContext(null);
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+// Normalize API Base URL to handle trailing slashes or missing /api automatically
+function getApiBaseUrl() {
+  let url = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+  url = url.trim().replace(/\/+$/, '');
+  if (!url.endsWith('/api')) {
+    url = `${url}/api`;
+  }
+  return url;
+}
+
+const API_BASE_URL = getApiBaseUrl();
+
+// Safe JSON parser to handle Render spin-down HTML responses gracefully
+async function safeParseJson(res) {
+  const text = await res.text();
+  try {
+    return JSON.parse(text);
+  } catch (err) {
+    if (text.includes('<!DOCTYPE') || text.includes('<html') || res.status === 502 || res.status === 503) {
+      throw new Error('The backend server on Render is waking up from sleep. Please wait 15-30 seconds and try again.');
+    }
+    throw new Error(text || `Server responded with status ${res.status}`);
+  }
+}
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
@@ -27,19 +50,17 @@ export function AuthProvider({ children }) {
             const res = await fetch(`${API_BASE_URL}/auth/me`, {
               headers: { Authorization: `Bearer ${storedToken}` }
             });
-            const data = await res.json();
+            const data = await safeParseJson(res);
             if (data.success && data.user) {
               setUser(data.user);
               localStorage.setItem('equiprent_user', JSON.stringify(data.user));
             } else {
-              // Token expired or invalid
               localStorage.removeItem('equiprent_token');
               localStorage.removeItem('equiprent_user');
               setToken(null);
               setUser(null);
             }
           } catch (netErr) {
-            // Keep storedUser if backend is temporarily unreachable so reload doesn't kick user out
             console.warn('Backend verification warning:', netErr.message);
           }
         }
@@ -61,7 +82,7 @@ export function AuthProvider({ children }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })
       });
-      const data = await res.json();
+      const data = await safeParseJson(res);
       if (!res.ok || !data.success) {
         throw new Error(data.message || 'Login failed. Please check your credentials.');
       }
@@ -84,7 +105,7 @@ export function AuthProvider({ children }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, email, password, photoURL, role, phone, address })
       });
-      const data = await res.json();
+      const data = await safeParseJson(res);
       if (!res.ok || !data.success) {
         throw new Error(data.message || 'Registration failed.');
       }
@@ -103,7 +124,7 @@ export function AuthProvider({ children }) {
   const loginWithGoogle = async (googleData = {}) => {
     try {
       const payload = {
-        name: googleData.name || 'Google Customer',
+        name: googleData.name || 'Alex Rivera (Google Customer)',
         email: googleData.email || 'customer.google@equiprent.com',
         photoURL: googleData.photoURL || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150'
       };
@@ -113,7 +134,7 @@ export function AuthProvider({ children }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
-      const data = await res.json();
+      const data = await safeParseJson(res);
       if (!res.ok || !data.success) {
         throw new Error(data.message || 'Google authentication failed.');
       }
@@ -139,7 +160,7 @@ export function AuthProvider({ children }) {
         },
         body: JSON.stringify(updates)
       });
-      const data = await res.json();
+      const data = await safeParseJson(res);
       if (!res.ok || !data.success) {
         throw new Error(data.message || 'Failed to update profile.');
       }
